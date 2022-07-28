@@ -1,5 +1,5 @@
 from numpy import exp
-import random as rand
+import numpy.random as rand
 
 class NodeGene:
     def __init__(self, type:int, id):
@@ -27,8 +27,9 @@ class ConGene:
         self.id = self.gen_id(innovations)# represents innovation number for crossover
          
     def __repr__(self):
-        if self.status == True:
+        if self.status:
             return str([self.inNode.id, self.outNode.id])  
+
         else: return "-"
 
     def gen_id(self, innovations:dict):
@@ -50,7 +51,7 @@ class Genome:
         v = True
 
         #generate random choices and check if valid - for loop prevents infinite while loop if there are no valid connections
-        for i in range(len(self.nodes)):
+        for i in self.nodes:
             inNode = rand.choice(self.nodes)
             outNode = rand.choice(self.nodes)
             if outNode.type != 'INPUT' and outNode != inNode:
@@ -60,7 +61,7 @@ class Genome:
         if valid:
             #Check if generated value is not in list
             for i in self.connections:
-                if [i.inNode, i.outNode] == [inNode, outNode]:
+                if [i.inNode, i.outNode] is [inNode, outNode]:
                     v = False
             if v:   
                 self.connections.append(ConGene(inNode, outNode))
@@ -89,17 +90,16 @@ class Genome:
     
 
     def mutate(self, mutation_rate):
-        mutation = True if rand.randint(0, 100) <= mutation_rate * 100 else False
+        mutation = True if rand.random(0, 100) <= mutation_rate else False
         
         if mutation:
             if self.connections:
-                r = rand.randint(0, len(self.connections) - 1)
-                connection:ConGene = self.connections[r]
+                connection:ConGene = rand.choice(self.connections)
 
                 #some mutations happen more frequently - this simulates
                 prob = rand.randint(1, 100)
                 if prob <= 25:
-                    self.mutate_node(connection, r)
+                    self.mutate_node(connection)
 
                 if prob > 25 and prob <= 60:    
                     self.mutate_status(connection)
