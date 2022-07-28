@@ -1,52 +1,36 @@
-from time import perf_counter
+from dataclasses import dataclass
+from Genomes import Genome
 import Genomes as Genomes
 from visualize import GraphVisualization
-import numpy as np
 
+@dataclass
 class Actor:
-    def __init__(self, x, y):
-        self.input_nodes = []
-        self.output_nodes = []
-        self.nodes = []
-        self.connections = []
-        self.x = x
-        self.y = y
-        self.mutation_rate = .05
-        self.genome = None
-        self.food = 40
-        self.inputs = None
+    x: int
+    y: int
+    input_nodes = []
+    output_nodes = []
+    nodes = []
+    connections = []
+    mutation_rate: float = .05
+    genome: Genome = None
+    food: int = 40
+    inputs: list = None
 
     def __repr__(self):
         return str(self.food)
 
-
     def generate_input(self, num_input): #Creates NodeGenes that are tagged as inputs and added to input node list
-        start1= perf_counter()
         self.input_nodes = [Genomes.NodeGene(0, i+1) for i in range(num_input)]
         self.nodes += self.input_nodes
-        end1 = perf_counter()
-
-        start = perf_counter()
-        for i in range(num_input):
-            node = Genomes.NodeGene(0, i + 1)
-            self.input_nodes.append(node)
-            self.nodes.append(node)
-        end = perf_counter()
-        print(end1 - start1)
-        print(end - start)
-        
 
 
     def generate_output(self, num_output): #Same as generate_input but for outputs
-        for i in range(num_output):
-            node = Genomes.NodeGene(2, 1+len(self.nodes))
-            self.output_nodes.append(node)
-            self.nodes.append(node)
-
+        self.output_nodes = [Genomes.NodeGene(2, 1+len(self.nodes)) for i in range(num_output)]
+        self.nodes += self.output_nodes
 
     def generate_empty(self, num_input, num_output):
-        self.generate_input(self, num_input)
-        self.generate_output(self, num_output)
+        self.generate_input(num_input)
+        self.generate_output(num_output)
         self.genome = Genomes.Genome(self.connections, self.nodes)
 
 
@@ -79,6 +63,7 @@ class Actor:
         self.genome.mutate(self.mutation_rate)
         self.feedForward()
 
+
     def visualize(self):
         G = GraphVisualization()
         cons = [i for i in self.genome.connections if i.status == True]
@@ -88,4 +73,5 @@ class Actor:
 
 
 N = Actor(1, 1)
-N.generate_input(30)
+N.generate_empty(30, 30)
+print(N)

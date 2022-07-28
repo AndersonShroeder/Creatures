@@ -1,36 +1,33 @@
+from dataclasses import dataclass
 from numpy import exp
 import numpy.random as rand
+innovations = {}
 
+
+@dataclass
 class NodeGene:
-    def __init__(self, type:int, id):
-        self.type = type # 0 = input, 1 = hidden, 2 = output
-        self.id = id # id number of node
+    type: int # 0 = input, 1 = hidden, 2 = output
+    id: int # id number of node
+    sum: int = 0
+    activation_func: bool = None
+    activation_val: int = 0
 
-        #for feed forward loop - keep track of sum into node
-        self.sum = 0
-        self.activation_func = None
-        self.activation_val = 0
-
-    def __repr__(self):
-        return str(self.id)
-    
     def activation(self, num): # currently sigmoid
         return 1/(1+exp(-num))
 
 
+@dataclass
 class ConGene:
-    def __init__(self, inNode:NodeGene, outNode:NodeGene, count, innovations:dict, weight = 0.02, status = True):
-        self.inNode = inNode
-        self.outNode = outNode
-        self.weight = weight
-        self.status = status #enables or disables the gene connection
-        self.id = self.gen_id(innovations)# represents innovation number for crossover
-         
-    def __repr__(self):
-        if self.status:
-            return str([self.inNode.id, self.outNode.id])  
 
-        else: return "-"
+    inNode: NodeGene
+    outNode: NodeGene
+    weight: float
+    status: bool = True #enables or disables the gene connection
+    innovations = innovations
+    id: int = None # represents innovation number for crossover
+
+    def __post_init__(self):
+        self.gen_id(self.innovations)
 
     def gen_id(self, innovations:dict):
         lst = (self.inNode, self.outNode)
@@ -39,6 +36,8 @@ class ConGene:
             innovations[lst] = len(innovations) + 1
 
         self.id = innovations[lst]
+    
+    
 
 
 class Genome:
