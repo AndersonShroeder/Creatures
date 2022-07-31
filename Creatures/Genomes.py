@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from numpy import exp
-import numpy.random as rand
+import random as rand
 innovations = {}
 
 
@@ -21,13 +21,14 @@ class ConGene:
 
     inNode: NodeGene
     outNode: NodeGene
-    weight: float
+    weight: float = 1
     status: bool = True #enables or disables the gene connection
     innovations = innovations
     id: int = None # represents innovation number for crossover
 
     def __post_init__(self):
-        self.gen_id(self.innovations)
+        pass
+        #self.gen_id(self.innovations)
 
     def gen_id(self, innovations:dict):
         lst = (self.inNode, self.outNode)
@@ -45,7 +46,7 @@ class Genome:
         self.connections = connections
         self.nodes = nodes
 
-    def mutate_con(self, *args): #method losses effectiveness the more dense the network is
+    def mutate_con(self, connection:ConGene): #method losses effectiveness the more dense the network is
         valid = False
         v = True
 
@@ -89,7 +90,7 @@ class Genome:
     
 
     def mutate(self, mutation_rate):
-        mutation = True if rand.random(0, 100) <= mutation_rate else False
+        mutation = True if rand.randint(0, 100) <= (mutation_rate * 100) else False
         
         if mutation:
             if self.connections:
@@ -110,6 +111,11 @@ class Genome:
 
             else:
                 self.mutate_con(connection=None)
+
+    def mutate_x(self, mutation_rate, number):
+        for i in range(number):
+            self.mutate(mutation_rate)
+
 
     def crossover(self, second):
         # Find matching genes in order to randomly assign to new genome

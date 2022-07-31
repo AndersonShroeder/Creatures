@@ -1,3 +1,4 @@
+from copy import deepcopy
 from dataclasses import dataclass
 from Genomes import Genome
 import Genomes as Genomes
@@ -15,6 +16,7 @@ class Actor:
     genome: Genome = None
     food: int = 40
     inputs: list = None
+    output_vector = []
 
     def __repr__(self):
         return str(self.food)
@@ -25,8 +27,9 @@ class Actor:
 
 
     def generate_output(self, num_output): #Same as generate_input but for outputs
-        self.output_nodes = [Genomes.NodeGene(2, 1+len(self.nodes)) for i in range(num_output)]
+        self.output_nodes = [Genomes.NodeGene(2, i+len(self.nodes) + 1) for i in range(num_output)]
         self.nodes += self.output_nodes
+
 
     def generate_empty(self, num_input, num_output):
         self.generate_input(num_input)
@@ -34,30 +37,40 @@ class Actor:
         self.genome = Genomes.Genome(self.connections, self.nodes)
 
 
-    def feedForward(self): #New method possibly required - currently activations happen without complete sum - might not be a bad thing?
-        output_vector = []
+    # generates a genome that has mutated connections
+    def generate_mutated(self, num_input, num_output, number):
+        self.generate_empty(num_input, num_output)
+        self.genome.mutate_x(self.mutation_rate, number)
 
+
+    def feedForward(self): #New method possibly required - currently activations happen without complete sum - might not be a bad thing?
         #input step - somewhat workaround - nodes and inputs must be input in exact order. Possible fix = dictionary
-        for index, node in enumerate(self.genome.input_nodes):
-            node.sum = self.input_nodes[index]
+        self.output_vector = []
+        for index, node in enumerate(self.input_nodes):
+            node.sum = self.input_nodes[index].sum
 
 
         #for each connection we take the inNode sum multiply it by the connection weight and sum it to outNode sum
-        check_list = []
         for gene in self.genome.connections:
             #print(gene.inNode.sum * gene.weight)
             gene.outNode.sum += gene.outNode.activation(gene.inNode.sum * gene.weight)
 
 
         #output step - another workaround - outputs must be read in exact/static order
-        for i in self.genome.output_nodes:
-            output_vector.append(i.activation(i.sum))
+        for i in self.output_nodes:
+            self.output_vector.append(i.activation(i.sum))
 
         #reset node values
-        for node in self.enome.nodes:
+        for node in self.genome.nodes:
             node.sum = 0
 
-        return output_vector
+
+    def replicate(self):
+        a = deepcopy(self)
+        a.x -= 1
+        a.y -= 1
+        return a
+
 
     def time_step(self):
         self.genome.mutate(self.mutation_rate)
@@ -70,8 +83,3 @@ class Actor:
         nds = self.genome.nodes
         G.graph(nds, cons)
 
-
-
-N = Actor(1, 1)
-N.generate_empty(30, 30)
-print(N)
