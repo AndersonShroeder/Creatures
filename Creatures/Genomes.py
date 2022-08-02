@@ -82,7 +82,8 @@ class Genome:
 
     
     def mutate_weight_multi(self, connection:ConGene, factor = .08):
-        connection.weight *= factor
+        #connection.weight *= factor
+        pass
 
 
     def mutate_weight_random(self, connection:ConGene):
@@ -98,14 +99,14 @@ class Genome:
 
                 #some mutations happen more frequently - this simulates
                 prob = rand.randint(1, 100)
-                if prob <= 25:
+                if prob <= 10:
                     self.mutate_node(connection)
 
-                if prob > 25 and prob <= 60:    
-                    self.mutate_status(connection)
+                if prob > 10 and prob <= 30:    
+                    self.mutate_con(connection)
 
                 else:
-                    lst = [self.mutate_con, self.mutate_weight_multi, self.mutate_weight_random]
+                    lst = [self.mutate_status, self.mutate_weight_multi, self.mutate_weight_random]
                     rand.choice(lst)(connection)
 
 

@@ -3,20 +3,40 @@ from dataclasses import dataclass
 from Genomes import Genome
 import Genomes as Genomes
 from visualize import GraphVisualization
+import pygame
+LIGHT_GREY = (160,160,160)
+
+@dataclass
+class Food:
+    x: int
+    y: int
+    row: int
+    col: int
+    width: int
+    color = LIGHT_GREY
+
+    def draw(self, win):
+        pygame.draw.rect(win, self.color, (self.col, self.row, self.width, self.width))
+
 
 @dataclass
 class Actor:
     x: int
     y: int
+    col: int
+    row: int
+    width: int
     input_nodes = []
     output_nodes = []
     nodes = []
     connections = []
-    mutation_rate: float = .05
+    mutation_rate: float = .5
     genome: Genome = None
-    food: int = 40
+    food: int = 400
     inputs: list = None
+    color = (0,0,0)
     output_vector = []
+    foodcol = 0
 
     def __repr__(self):
         return str(self.food)
@@ -45,6 +65,7 @@ class Actor:
 
     def feedForward(self): #New method possibly required - currently activations happen without complete sum - might not be a bad thing?
         #input step - somewhat workaround - nodes and inputs must be input in exact order. Possible fix = dictionary
+        self.genome.mutate(self.mutation_rate)
         self.output_vector = []
         for index, node in enumerate(self.input_nodes):
             node.sum = self.input_nodes[index].sum
@@ -73,7 +94,6 @@ class Actor:
 
 
     def time_step(self):
-        self.genome.mutate(self.mutation_rate)
         self.feedForward()
 
 
@@ -83,3 +103,5 @@ class Actor:
         nds = self.genome.nodes
         G.graph(nds, cons)
 
+    def draw(self, win):
+        pygame.draw.rect(win, self.color, (self.col, self.row, self.width, self.width))
